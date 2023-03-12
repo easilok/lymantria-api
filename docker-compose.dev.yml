@@ -1,0 +1,18 @@
+version: '3.3'
+services:
+    lymantria_db:
+        image: postgres:15-alpine
+        container_name: lymantria_db
+        environment:
+            POSTGRES_DB: lymantria
+            POSTGRES_PASSWORD: lymantria-pass
+            POSTGRES_USER: lymantria
+        ports:
+            - 5432:5432
+        volumes:
+            - ./database/seed:/docker-entrypoint-initdb.d/
+            - lymantria-db-data:/var/lib/postgresql/data
+
+volumes:
+    lymantria-db-data:
+
