@@ -3,8 +3,10 @@ package main
 import (
 	c "github.com/easilok/lymantria-api/controller"
 	"github.com/easilok/lymantria-api/database"
+	"github.com/easilok/lymantria-api/models"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 )
 
 var log *logrus.Logger
@@ -16,6 +18,9 @@ var databaseConfig database.DatabaseConfig = database.DatabaseConfig{
 	Database: "lymantria",
 	Port:     5432,
 }
+
+// TODO - This should be removed after token middlware implementation
+var db *gorm.DB
 
 func main() {
 	// loadConfig()
@@ -31,17 +36,22 @@ func main() {
 	r := gin.Default()
 	r.Use(CORSMiddleware())
 
-	db := database.ConnectDatabase(&databaseConfig)
+	db = database.ConnectDatabase(&databaseConfig)
 	controllers := c.NewBaseHandler(db)
 
 	// helpers.CheckTokenSecrets()
 
 	apiGroup := r.Group("/api")
 	{
+		// Butterfly routes
 		apiGroup.GET("/butterfly", TokenAuthMiddleware(), controllers.GetButterfly)
 		// apiGroup.POST("/butterfly", TokenAuthMiddleware(), controllers.FavoriteNote)
-		// apiGroup.PUT("/butterfly/:butterfly", TokenAuthMiddleware(), controllers.UpdateNote)
-		// apiGroup.DELETE("/butterfly/:butterfly", TokenAuthMiddleware(), controllers.DeleteNote)
+		apiGroup.PUT("/butterfly/:butterflyId", TokenAuthMiddleware(), controllers.UpdateButterfly)
+		apiGroup.DELETE("/butterfly/:butterflyId", TokenAuthMiddleware(), controllers.DeleteButterfly)
+
+		// Monitoring routes
+		apiGroup.GET("/monitoring", TokenAuthMiddleware(), controllers.GetMonitoring)
+		apiGroup.GET("/monitoring/:monitoringId/butterflies", TokenAuthMiddleware(), controllers.GetMonitoringButterflies)
 	}
 
 	// authGroup := r.Group("/auth")
@@ -83,7 +93,13 @@ func TokenAuthMiddleware() gin.HandlerFunc {
 		// 	c.Abort()
 		// 	return
 		// }
-		// c.Set("userId", au.UserId)
+		var au models.User
+		if err := db.First(&au).Error; err != nil {
+			log.Error("Could not find first user for application default usage")
+			c.Abort()
+			return
+		}
+		c.Set("userId", au.ID)
 		c.Next()
 	}
 }

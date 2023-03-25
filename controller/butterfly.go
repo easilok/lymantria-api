@@ -1,201 +1,94 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
+	"time"
 
-	// "github.com/easilok/lymantria-api/model"
+	"github.com/easilok/lymantria-api/models"
 	"github.com/gin-gonic/gin"
+	// "gorm.io/gorm/clause"
 )
 
 // GET /butterfly
 // Get registered butterflies
 func (h *BaseHandler) GetButterfly(c *gin.Context) {
-	// userId, exists := c.Get("userId")
-	// if !exists {
-	// 	c.JSON(http.StatusForbidden, gin.H{})
-	// 	return
-	// }
-	// var butterflies model.Butterfly
-	// h.db.Model(&model.Butterfly{}).Where("user_id = ?", userId).Scan(&catalog.Notes)
+	_, exists := c.Get("userId")
+	if !exists {
+		c.JSON(http.StatusForbidden, gin.H{})
+		return
+	}
+	var butterflies []models.Butterfly
+	h.db.Model(&models.Butterfly{}).Where("butterflies.deleted_at IS NULL").Preload("Details").Find(&butterflies)
 
-	// // Build a response object, to allow more data
-	// var response = map[string]interface{}{
-	// 	"notes": catalog.Notes,
-	// }
-	c.JSON(http.StatusOK, gin.H{"data": nil})
+	c.JSON(http.StatusOK, gin.H{"records": butterflies})
 }
 
-// // Patch /favorites/:filename
-// // Update a favorite status on note
-// func (h *BaseHandler) FavoriteNote(c *gin.Context) {
-// 	userId, exists := c.Get("userId")
-// 	if !exists {
-// 		c.JSON(http.StatusForbidden, gin.H{})
-// 		return
-// 	}
-// 	// Validate input
-// 	var input FavoritesInput
-// 	if err := c.ShouldBindJSON(&input); err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-// 		return
-// 	}
-// 	filename := c.Param("filename")
-// 	filename = helpers.String(filename).GetFilename(".md")
+// PUT /butterfly/:butterflyId
+// Update a butterfly
+func (h *BaseHandler) UpdateButterfly(c *gin.Context) {
 
-// 	var selectedNote models.NoteInformation
-// 	if err := h.db.Where("filename = ? AND user_id = ?", filename, userId).First(&selectedNote).Error; err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
-// 		return
-// 	}
+	_, exists := c.Get("userId")
+	if !exists {
+		c.JSON(http.StatusForbidden, gin.H{})
+		return
+	}
+	// Validate input
+	var input models.Butterfly
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(
+			http.StatusBadRequest,
+			gin.H{"error": fmt.Sprintf("Failed to parse input: %s", err.Error())},
+		)
+		return
+	}
 
-// 	selectedNote.Favorite = *input.Favorite
-// 	// This update with map is for avoid error on update with struct working only for non zero values
-// 	if err := h.db.Model(&selectedNote).Updates(map[string]bool{"favorite": selectedNote.Favorite}).Error; err != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-// 	}
+	butterflyId := c.Param("butterflyId")
+	var editingButterfly models.Butterfly
+	var err error
+	if err = h.db.Where("id = ?", butterflyId).First(&editingButterfly).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Record not found!"})
+		return
+	}
 
-// 	c.JSON(http.StatusOK, gin.H{"data": selectedNote.ExportedFields()})
-// }
+	// Updates current butterfly details
+	if err = h.db.Model(&editingButterfly).Updates(input).Error; err != nil {
+		c.JSON(
+			http.StatusBadRequest,
+			gin.H{"error": fmt.Sprintf("Failed to update butterfly: %s", err.Error())},
+		)
+	}
 
-// // GET /note/:filename
-// // Get a note
-// func (h *BaseHandler) GetNote(c *gin.Context) { // Get model if exist
+	var editedButterfly models.Butterfly
+	if err = h.db.Where("id = ?", butterflyId).First(&editedButterfly).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Record not found!"})
+		return
+	}
 
-// 	userId, exists := c.Get("userId")
-// 	if !exists {
-// 		c.JSON(http.StatusForbidden, gin.H{})
-// 		return
-// 	}
-// 	userIdStr := strconv.FormatUint(userId.(uint64), 10)
-// 	// Find filename on local machine
-// 	filename := c.Param("filename")
-// 	filename = helpers.String(filename).GetFilename(".md")
-// 	filepath := "notes" + string(os.PathSeparator) + userIdStr + string(os.PathSeparator) + filename + ".md"
+	c.JSON(http.StatusOK, gin.H{"record": editedButterfly})
+}
 
-// 	// If filename not found delete from note information
-// 	data, err := os.ReadFile(filepath)
-// 	if err != nil {
-// 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-// 		return
-// 	}
-// 	// Return note content
-// 	noteContent := string(data)
-// 	var response = map[string]string{
-// 		"filename": filename,
-// 		"content":  noteContent,
-// 	}
+// DELETE /butterfly/:butterflyId
+// Delete a butterfly
+func (h *BaseHandler) DeleteButterfly(c *gin.Context) {
+	_, exists := c.Get("userId")
+	if !exists {
+		c.JSON(http.StatusForbidden, gin.H{})
+		return
+	}
+	butterflyId := c.Param("butterflyId")
 
-// 	var requestedNote models.NoteInformation
-// 	if err := h.db.Where("filename = ? AND user_id = ?", filename, userId).First(&requestedNote).Error; err != nil {
-// 		// Note is note on catalog, so add it
-// 		requestedNote.Filename = filename
-// 		requestedNote.Title = helpers.String(noteContent).TitleFromMarkdown()
-// 		requestedNote.Favorite = false
-// 		requestedNote.UserID = uint(userId.(uint64))
-// 		h.db.Create(&requestedNote)
-// 	}
+	// if filename exists on storage -> delete it -> remove from note information
+	var deletingButterfly models.Butterfly
+	if err := h.db.Where("id = ?", butterflyId).First(&deletingButterfly).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Record not found!"})
+		return
+	}
 
-// 	c.JSON(http.StatusOK, gin.H{"data": response})
-// }
+	if err := h.db.Model(&deletingButterfly).Update("deleted_at", time.Now()).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Could not delete butterfly"})
+		return
+	}
 
-// // PUT /note/:filename
-// // Create/Update a note
-// func (h *BaseHandler) UpdateNote(c *gin.Context) {
-
-// 	userId, exists := c.Get("userId")
-// 	if !exists {
-// 		c.JSON(http.StatusForbidden, gin.H{})
-// 		return
-// 	}
-// 	userIdStr := strconv.FormatUint(userId.(uint64), 10)
-// 	// Validate input
-// 	var input UpdateNoteInput
-// 	if err := c.ShouldBindJSON(&input); err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-// 		return
-// 	}
-
-// 	// Find filename on local machine
-// 	filename := c.Param("filename")
-// 	filename = helpers.String(filename).GetFilename(".md")
-// 	helpers.CheckUserNotesFolder("notes", userIdStr)
-// 	filepath := "notes" + string(os.PathSeparator) + userIdStr + string(os.PathSeparator) + filename + ".md"
-
-// 	var editingNote models.NoteInformation
-// 	var err error
-// 	isNewNote := false
-// 	if err = h.db.Where("filename = ? AND user_id = ?", filename, userId).First(&editingNote).Error; err != nil {
-// 		isNewNote = true
-// 	}
-
-// 	responseCode := http.StatusOK
-// 	editingNote.Title = helpers.String(input.Content).TitleFromMarkdown()
-
-// 	if isNewNote {
-// 		// Let's add it
-// 		editingNote.Filename = filename
-// 		editingNote.Favorite = false
-// 		editingNote.UserID = uint(userId.(uint64))
-// 		err = h.db.Create(&editingNote).Error
-// 		responseCode = http.StatusCreated
-// 	} else {
-// 		// This is an update
-// 		err = h.db.Model(&editingNote).Updates(editingNote).Error
-// 	}
-
-// 	if err != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-// 	}
-
-// 	// Add note file system. If exists just override it
-// 	// err = os.WriteFile(filepath, []byte(input.Content), 0666)
-// 	// err = ioutil.WriteFile(filepath, []byte(input.Content), 0666)
-// 	f, err := os.Create(filepath)
-// 	if err != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-// 	}
-// 	defer f.Close()
-// 	err = f.Chmod(0777)
-// 	if err != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-// 	}
-// 	_, err = f.WriteString(input.Content)
-// 	if err != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-// 	}
-
-// 	c.JSON(responseCode, gin.H{"data": editingNote.ExportedFields()})
-// }
-
-// // DELETE /note/:filename
-// // Delete a note
-// func (h *BaseHandler) DeleteNote(c *gin.Context) {
-// 	userId, exists := c.Get("userId")
-// 	if !exists {
-// 		c.JSON(http.StatusForbidden, gin.H{})
-// 		return
-// 	}
-// 	userIdStr := strconv.FormatUint(userId.(uint64), 10)
-// 	// Find filename on local machine
-// 	filename := c.Param("filename")
-// 	filename = helpers.String(filename).GetFilename(".md")
-// 	// filepath := "notes" + string(os.PathSeparator) + filename + ".md"
-
-// 	// if filename exists on storage -> delete it -> remove from note information
-// 	var deletingNote models.NoteInformation
-// 	if err := h.db.Where("filename = ? AND user_id = ?", filename, userId).First(&deletingNote).Error; err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
-// 		return
-// 	}
-
-// 	h.db.Delete(&deletingNote)
-
-// 	message := ""
-// 	filePath := userIdStr + string(os.PathSeparator) + filename + ".md"
-// 	helpers.CheckUserNotesFolder("notes", userIdStr)
-// 	if err := helpers.TrashFile("notes", filePath); err != nil {
-// 		message = "Error deleting file: " + err.Error()
-// 	}
-
-// 	c.JSON(http.StatusOK, gin.H{"data": true, "message": message})
-// }
+	c.JSON(http.StatusOK, gin.H{"result": true, "message": "Butterfly deleted"})
+}
