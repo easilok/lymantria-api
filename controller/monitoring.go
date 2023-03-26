@@ -34,7 +34,7 @@ func (h *BaseHandler) GetMonitoring(c *gin.Context) {
 
 	monitoringId := c.Param("monitoringId")
 	var monitoring models.Monitoring
-	err := h.db.Model(&models.Monitoring{}).Where("deleted_at IS NULL").Where("id = ?", monitoringId).Preload("Appearances.Register").Preload("Appearances.Butterfly.Details").Preload(clause.Associations).Find(&monitoring).Error
+	err := h.db.Model(&models.Monitoring{}).Where("deleted_at IS NULL").Where("id = ?", monitoringId).Preload("Appearances.Register").Preload("Appearances.Butterfly.Details").Preload(clause.Associations).First(&monitoring).Error
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Record not found!"})
 		return
