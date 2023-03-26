@@ -19,5 +19,5 @@ type Monitoring struct {
 	Observation  string                 `j́son:"obs"`
 	HostedBy     uint                   `json:"hosted_by" gorm:"not null"`
 	Host         User                   `json:"user" gorm:"foreignKey:HostedBy"`
-	Butterflies  []ButterflyAppearances `json:"butterflies" gorm:"ForeignKey:MonitoringId"`
+	Appearances  []ButterflyAppearances `json:"appearances" gorm:"ForeignKey:MonitoringId"`
 }

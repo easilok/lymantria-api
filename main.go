@@ -44,14 +44,14 @@ func main() {
 	apiGroup := r.Group("/api")
 	{
 		// Butterfly routes
-		apiGroup.GET("/butterfly", TokenAuthMiddleware(), controllers.GetButterfly)
+		apiGroup.GET("/butterfly", TokenAuthMiddleware(), controllers.GetAllButterflies)
 		// apiGroup.POST("/butterfly", TokenAuthMiddleware(), controllers.FavoriteNote)
 		apiGroup.PUT("/butterfly/:butterflyId", TokenAuthMiddleware(), controllers.UpdateButterfly)
 		apiGroup.DELETE("/butterfly/:butterflyId", TokenAuthMiddleware(), controllers.DeleteButterfly)
 
 		// Monitoring routes
-		apiGroup.GET("/monitoring", TokenAuthMiddleware(), controllers.GetMonitoring)
-		apiGroup.GET("/monitoring/:monitoringId/butterflies", TokenAuthMiddleware(), controllers.GetMonitoringButterflies)
+		apiGroup.GET("/monitoring", TokenAuthMiddleware(), controllers.GetAllMonitorings)
+		apiGroup.GET("/monitoring/:monitoringId", TokenAuthMiddleware(), controllers.GetMonitoring)
 	}
 
 	// authGroup := r.Group("/auth")

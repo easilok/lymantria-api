@@ -12,7 +12,7 @@ import (
 
 // GET /butterfly
 // Get registered butterflies
-func (h *BaseHandler) GetButterfly(c *gin.Context) {
+func (h *BaseHandler) GetAllButterflies(c *gin.Context) {
 	_, exists := c.Get("userId")
 	if !exists {
 		c.JSON(http.StatusForbidden, gin.H{})
