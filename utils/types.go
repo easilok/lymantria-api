@@ -72,3 +72,36 @@ func (ni NullInt32) Value() (driver.Value, error) {
 	// such as Int32.
 	return ni.Int32, nil
 }
+
+type NullTime sql.NullTime
+
+func (nt NullTime) MarshalJSON() ([]byte, error) {
+	if nt.Valid {
+		return json.Marshal(nt.Time)
+	}
+	return json.Marshal(0)
+}
+
+// Scan implements the Scanner interface for NullTime
+func (nt *NullTime) Scan(value interface{}) error {
+	var n sql.NullTime
+	if err := n.Scan(value); err != nil {
+		return err
+	}
+
+	// if nil then make Valid false
+	if reflect.TypeOf(value) == nil {
+		*nt = NullTime{n.Time, false}
+	} else {
+		*nt = NullTime{n.Time, true}
+	}
+
+	return nil
+}
+
+// Value - Implementation of valuer for database/sql
+func (ni NullTime) Value() (driver.Value, error) {
+	// value needs to be a base driver.Value type
+	// such as Int32.
+	return ni.Time, nil
+}
