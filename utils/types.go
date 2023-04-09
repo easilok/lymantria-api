@@ -79,7 +79,7 @@ func (nt NullTime) MarshalJSON() ([]byte, error) {
 	if nt.Valid {
 		return json.Marshal(nt.Time)
 	}
-	return json.Marshal(0)
+	return json.Marshal("")
 }
 
 // Scan implements the Scanner interface for NullTime

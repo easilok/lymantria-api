@@ -28,13 +28,14 @@ type Butterfly struct {
 	UpdatedAt   time.Time        `json:"-"`
 	DeletedAt   gorm.DeletedAt   `json:"-" gorm:"index"`
 	Scientific  string           `json:"scientific" gorm:"unique,not null"`
-	UserId      uint             `json:"user_id" gorm:"not null"`
 	Described   string           `json:"described" gorm:"not null"`
+	Family      string           `json:"family" gorm:"not null,default:''"`
+	UserId      uint             `json:"user_id" gorm:"not null"`
 	Rarity      ButterflyRarity  `json:"rarity" gorm:"type:enum_butterfly_rarity;not null"`
 	Daytime     ButterflyDaytime `json:"daytime" gorm:"type:enum_butterfly_daytime;not null"`
 	Group       utils.NullString `json:"group"`
 	Appearances uint             `json:"appearances" gorm:"default:0;not null"`
-	Size        utils.NullInt32  `json:"size"`
+	Size        utils.NullString `json:"size"`
 	Image       utils.NullString `json:"image"`
 	// External models
 	User    User                   `json:"user"`
