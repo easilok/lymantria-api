@@ -15,8 +15,8 @@ type Monitoring struct {
 	RegisteredAt  time.Time      `json:"registered_at" gorm:"not null"`
 	Local         string         `json:"local" gorm:"not null"`
 	Name          string         `json:"name" gorm:"not null"`
-	Longitude     uint           `json:"longitude"`
-	Latitude      uint           `json:"latitude"`
+	Longitude     float32        `json:"longitude"`
+	Latitude      float32        `json:"latitude"`
 	Observation   string         `j́son:"obs"`
 	HostedBy      uint           `json:"hosted_by" gorm:"not null"`
 	TimestampEnd  utils.NullTime `json:"timestamp_end"`
