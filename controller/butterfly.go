@@ -13,11 +13,6 @@ import (
 // GET /butterfly
 // Get registered butterflies
 func (h *BaseHandler) GetAllButterflies(c *gin.Context) {
-	_, exists := c.Get("userId")
-	if !exists {
-		c.JSON(http.StatusForbidden, gin.H{})
-		return
-	}
 	var butterflies []models.Butterfly
 	h.db.Model(&models.Butterfly{}).Where("butterflies.deleted_at IS NULL").Preload("Details").Find(&butterflies)
 

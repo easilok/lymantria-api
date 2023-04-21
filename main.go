@@ -44,15 +44,18 @@ func main() {
 	apiGroup := r.Group("/api")
 	{
 		// Butterfly routes
-		apiGroup.GET("/butterfly", TokenAuthMiddleware(), controllers.GetAllButterflies)
-		// apiGroup.POST("/butterfly", TokenAuthMiddleware(), controllers.FavoriteNote)
+		apiGroup.GET("/butterfly", controllers.GetAllButterflies)
+		// apiGroup.POST("/butterfly", TokenAuthMiddleware(), controllers.CreateButterfly)
 		apiGroup.PUT("/butterfly/:butterflyId", TokenAuthMiddleware(), controllers.UpdateButterfly)
 		apiGroup.DELETE("/butterfly/:butterflyId", TokenAuthMiddleware(), controllers.DeleteButterfly)
 
 		// Monitoring routes
-		apiGroup.GET("/monitoring", TokenAuthMiddleware(), controllers.GetAllMonitorings)
-		apiGroup.GET("/monitoring/latest", TokenAuthMiddleware(), controllers.GetMonitoringLatest)
-		apiGroup.GET("/monitoring/:monitoringId", TokenAuthMiddleware(), controllers.GetMonitoring)
+		apiGroup.GET("/monitoring", controllers.GetAllMonitorings)
+		apiGroup.GET("/monitoring/latest", controllers.GetMonitoringLatest)
+		apiGroup.GET("/monitoring/:monitoringId", controllers.GetMonitoring)
+		// apiGroup.POST("/monitoring", TokenAuthMiddleware(), controllers.CreateMonitoring)
+		// apiGroup.PUT("/monitoring/:monitoringId", TokenAuthMiddleware(), controllers.UpdateMonitoring)
+		// apiGroup.DELETE("/monitoring/:monitoringId", TokenAuthMiddleware(), controllers.DeleteMonitoring)
 	}
 
 	// authGroup := r.Group("/auth")

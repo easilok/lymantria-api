@@ -11,12 +11,6 @@ import (
 // GET /monitoring
 // Get registered monitorings
 func (h *BaseHandler) GetAllMonitorings(c *gin.Context) {
-	_, exists := c.Get("userId")
-	if !exists {
-		c.JSON(http.StatusForbidden, gin.H{})
-		return
-	}
-
 	var monitorings []models.Monitoring
 	h.db.Model(&models.Monitoring{}).Where("deleted_at IS NULL").Preload("Appearances.Register").Preload("Appearances.Butterfly.Details").Preload(clause.Associations).Find(&monitorings)
 
@@ -26,12 +20,6 @@ func (h *BaseHandler) GetAllMonitorings(c *gin.Context) {
 // GET /monitoring/:monitoringId
 // Get single monitoring and butterflies appearances
 func (h *BaseHandler) GetMonitoring(c *gin.Context) {
-	_, exists := c.Get("userId")
-	if !exists {
-		c.JSON(http.StatusForbidden, gin.H{})
-		return
-	}
-
 	monitoringId := c.Param("monitoringId")
 	var monitoring models.Monitoring
 	err := h.db.Model(&models.Monitoring{}).Where("deleted_at IS NULL").Where("id = ?", monitoringId).Preload("Appearances.Register").Preload("Appearances.Butterfly.Details").Preload(clause.Associations).First(&monitoring).Error
