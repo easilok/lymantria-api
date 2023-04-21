@@ -32,7 +32,7 @@ func FirstSetup(db *gorm.DB) {
 	}
 }
 
-func ConnectDatabase(config *DatabaseConfig) *gorm.DB {
+func ConnectDatabase(config *DatabaseConfig, firstSetup bool) *gorm.DB {
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%d sslmode=disable TimeZone=Europe/Lisbon",
 		config.Hostname,
@@ -54,7 +54,9 @@ func ConnectDatabase(config *DatabaseConfig) *gorm.DB {
 	database.AutoMigrate(&models.Monitoring{})
 	database.AutoMigrate(&models.ButterflyAppearances{})
 
-	FirstSetup(database)
+	if firstSetup {
+		FirstSetup(database)
+	}
 
 	return database
 }
