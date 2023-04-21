@@ -51,6 +51,7 @@ func main() {
 
 		// Monitoring routes
 		apiGroup.GET("/monitoring", TokenAuthMiddleware(), controllers.GetAllMonitorings)
+		apiGroup.GET("/monitoring/latest", TokenAuthMiddleware(), controllers.GetMonitoringLatest)
 		apiGroup.GET("/monitoring/:monitoringId", TokenAuthMiddleware(), controllers.GetMonitoring)
 	}
 
