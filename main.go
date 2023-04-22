@@ -4,6 +4,7 @@ import (
 	"github.com/easilok/lymantria-api/config"
 	c "github.com/easilok/lymantria-api/controllers"
 	"github.com/easilok/lymantria-api/database"
+	"github.com/easilok/lymantria-api/helpers"
 	"github.com/easilok/lymantria-api/middlewares"
 	"github.com/easilok/lymantria-api/routes"
 	"github.com/gin-gonic/gin"
@@ -31,7 +32,7 @@ func main() {
 	db = database.ConnectDatabase(&databaseConfig, true)
 	controllers := c.NewBaseHandler(db)
 
-	// helpers.CheckTokenSecrets()
+	helpers.CheckTokenSecrets()
 
 	routes.ApiRoutes(r, controllers)
 	routes.AuthRoutes(r, controllers)

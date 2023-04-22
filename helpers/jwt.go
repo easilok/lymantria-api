@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/easilok/lymantria-api/config"
 	"github.com/golang-jwt/jwt"
 	"github.com/twinj/uuid"
 )
@@ -29,10 +30,12 @@ type AccessDetails struct {
 func CheckTokenSecrets() {
 	accessSecret := os.Getenv("ACCESS_SECRET")
 	if len(accessSecret) == 0 {
+		config.Logger.Warning("ACCESS_SECRET not set, setting default value")
 		os.Setenv("ACCESS_SECRET", "jdnfksdmfksd") //this should be in an env file
 	}
 	refreshSecret := os.Getenv("REFRESH_SECRET")
 	if len(refreshSecret) == 0 {
+		config.Logger.Warning("REFRESH_SECRET not set, setting default value")
 		os.Setenv("REFRESH_SECRET", "mcmvmkmsdnfsdmfdsjf") //this should be in an env file
 	}
 }
