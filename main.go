@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	config "github.com/easilok/lymantria-api/config"
-	c "github.com/easilok/lymantria-api/controller"
+	c "github.com/easilok/lymantria-api/controllers"
 	"github.com/easilok/lymantria-api/database"
 	"github.com/easilok/lymantria-api/helpers"
 	"github.com/gin-gonic/gin"
@@ -29,7 +29,7 @@ func main() {
 	r := gin.Default()
 	r.Use(CORSMiddleware())
 
-	db = database.ConnectDatabase(&databaseConfig)
+	db = database.ConnectDatabase(&databaseConfig, true)
 	controllers := c.NewBaseHandler(db)
 
 	// helpers.CheckTokenSecrets()
