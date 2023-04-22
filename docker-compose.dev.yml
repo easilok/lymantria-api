@@ -13,6 +13,20 @@ services:
             - ./database/seed:/docker-entrypoint-initdb.d/
             - lymantria-db-data:/var/lib/postgresql/data
 
+    lymantria_db_test:
+        image: postgres:15-alpine
+        container_name: lymantria_db_test
+        environment:
+            POSTGRES_DB: lymantria_test
+            POSTGRES_PASSWORD: test-pass
+            POSTGRES_USER: test
+        ports:
+            - 5434:5432
+        volumes:
+            - ./database/seed:/docker-entrypoint-initdb.d/
+            - lymantria-db-test-data:/var/lib/postgresql/data
+
 volumes:
     lymantria-db-data:
+    lymantria-db-test-data:
 
