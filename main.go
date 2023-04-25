@@ -19,7 +19,6 @@ var databaseConfig database.DatabaseConfig = database.DatabaseConfig{
 	Port:     5432,
 }
 
-// TODO - This should be removed after token middlware implementation
 var db *gorm.DB
 
 func main() {

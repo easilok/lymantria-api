@@ -105,3 +105,36 @@ func (ni NullTime) Value() (driver.Value, error) {
 	// such as Int32.
 	return ni.Time, nil
 }
+
+type NullFloat64 sql.NullFloat64
+
+func (n NullFloat64) MarshalJSON() ([]byte, error) {
+	if n.Valid {
+		return json.Marshal(n.Float64)
+	}
+	return json.Marshal(0.0)
+}
+
+// Scan implements the Scanner interface for NullString
+func (ni *NullFloat64) Scan(value interface{}) error {
+	var n sql.NullFloat64
+	if err := n.Scan(value); err != nil {
+		return err
+	}
+
+	// if nil then make Valid false
+	if reflect.TypeOf(value) == nil {
+		*ni = NullFloat64{n.Float64, false}
+	} else {
+		*ni = NullFloat64{n.Float64, true}
+	}
+
+	return nil
+}
+
+// Value - Implementation of valuer for database/sql
+func (ni NullFloat64) Value() (driver.Value, error) {
+	// value needs to be a base driver.Value type
+	// such as FLoat64.
+	return ni.Float64, nil
+}
