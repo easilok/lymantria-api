@@ -1,3 +1,6 @@
+-- User
+INSERT INTO users(name, email, password, permissions) VALUES ('Lymantria', 'info@lymantria.pt', '', array[]::text[]);
+
 -- Butterflies
 INSERT INTO butterflies(created_at, updated_at, user_id, rarity, daytime, scientific, described, family, size, image, appearances) VALUES (NOW(),NOW(),(select id from users limit 1), 'common', 'night', 'Agrotis segetum','Denis & Schiffermüller, 1775','Noctuidae','33–41 mm','https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Agrotis.segetum.jpg/280px-Agrotis.segetum.jpg',1);
 INSERT INTO butterflies(created_at, updated_at, user_id, rarity, daytime, scientific, described, family, size, image, appearances) VALUES (NOW(),NOW(),(select id from users limit 1), 'common', 'night', 'Authographa gamma','Linnaeus, 1758','Noctuidae','30-45 mm','https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/Autographa.gamma.6902.jpg/220px-Autographa.gamma.6902.jpg',1);
