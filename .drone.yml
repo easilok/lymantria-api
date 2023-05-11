@@ -1,0 +1,36 @@
+---
+kind: pipeline
+name: run_tests
+type: docker
+
+steps:
+  - name: test
+    image: golang:1.19-alpine
+    commands:
+      - go test ./...
+
+---
+kind: pipeline
+name: deploy
+type: ssh
+
+depends_on:
+  - run_tests
+
+server:
+  host:
+    from_secret: ssh_host
+  user:
+    from_secret: ssh_username
+  ssh_key: 
+    from_secret: ssh_key
+
+steps:
+  - name: deploy
+    commands:
+      - cd /home/docker/lymantria-api
+      - git pull --rebase
+      - docker-compose up -d
+trigger:
+  branch:
+  - main
