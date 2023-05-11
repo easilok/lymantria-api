@@ -4,11 +4,12 @@ name: run_tests
 type: docker
 
 steps:
-  - name: seed test db
+  - name: seed
     image: postgres:15-alpine
     commands:
       - psql -h localhost -U test < ./database/seed/1.create_types.sql
       - psql -h localhost -U test < ./database/seed/2.struct.sql
+
   - name: test
     image: golang:1.19
     commands:
