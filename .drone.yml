@@ -9,6 +9,26 @@ steps:
     commands:
       - go test ./...
 
+services:
+  # This database stays running during the whole pipeline and can be accessed from any of the
+  # other steps.
+  - name: lymantria_test
+    image: postgres:15-alpine
+    ports:
+    - 5432
+    environment:
+      POSTGRES_DB: lymantria_test
+      POSTGRES_PASSWORD: test-pass
+      POSTGRES_USER: test
+    volumes:
+        - ./database/seed:/docker-entrypoint-initdb.d/
+
+trigger:
+  branch:
+    - main
+  event:
+    - push
+
 ---
 kind: pipeline
 name: deploy
@@ -33,4 +53,6 @@ steps:
       - docker-compose up -d
 trigger:
   branch:
-  - main
+    - main
+  event:
+    - push
