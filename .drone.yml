@@ -5,7 +5,7 @@ type: docker
 
 steps:
   - name: test
-    image: golang:1.19-alpine
+    image: golang:1.19
     commands:
       - go test ./...
 
