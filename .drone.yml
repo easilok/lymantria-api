@@ -30,8 +30,6 @@ services:
 trigger:
   branch:
     - main
-  event:
-    - push
 
 ---
 kind: pipeline
@@ -55,8 +53,3 @@ steps:
       - cd /home/docker/lymantria-api
       - git pull --rebase
       - docker-compose up -d
-trigger:
-  branch:
-    - main
-  event:
-    - push
